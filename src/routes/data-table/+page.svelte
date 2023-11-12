@@ -1,4 +1,6 @@
 <script lang="ts" context="module">
+	import DataTable from './data-table.svelte';
+
 	export type Payment = {
 		id: string;
 		amount: number;
@@ -93,3 +95,7 @@
 		},
 	];
 </script>
+
+<div class="flex justify-center content-center">
+	<DataTable data={payments} />
+</div>
