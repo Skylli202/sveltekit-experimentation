@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { Payment } from './+page.svelte';
-	import { createTable, Render, Subscribe } from 'svelte-headless-table';
+	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
 	import { readable } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
+	import DataTableActions from './data-table-actions.svelte';
 
 	export let data: Payment[];
 
@@ -26,7 +27,13 @@
 				return formatted;
 			},
 		}),
-		table.column({ accessor: ({ email }) => email, header: '' }),
+		table.column({
+			accessor: ({ email }) => email,
+			header: '',
+			cell: ({ id }) => {
+				return createRender(DataTableActions, { id });
+			},
+		}),
 	]);
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
