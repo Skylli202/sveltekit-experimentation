@@ -1,13 +1,18 @@
 <script lang="ts">
 	import type { Payment } from './+page.svelte';
 	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
+	import { addPagination } from 'svelte-headless-table/plugins';
 	import { readable } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
+	import { Button } from '$lib/components/ui/button';
 	import DataTableActions from './data-table-actions.svelte';
 
 	export let data: Payment[];
 
-	const table = createTable(readable(data));
+	const readableData = readable(data);
+	const table = createTable(readableData, {
+		page: addPagination(),
+	});
 
 	const columns = table.createColumns([
 		table.column({ accessor: 'id', header: 'ID' }),
@@ -36,7 +41,10 @@
 		}),
 	]);
 
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
+	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+		table.createViewModel(columns);
+
+	const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page;
 </script>
 
 <div class="rounded-md border">
@@ -89,4 +97,23 @@
 			{/each}
 		</Table.Body>
 	</Table.Root>
+</div>
+
+<div class="flex items-center justify-end space-x-2 py-4">
+	<Button
+		variant="outline"
+		size="sm"
+		on:click={() => ($pageIndex = $pageIndex - 1)}
+		disabled={!$hasPreviousPage}
+	>
+		Previous
+	</Button>
+	<Button
+		variant="outline"
+		size="sm"
+		on:click={() => ($pageIndex = $pageIndex + 1)}
+		disabled={!$hasNextPage}
+	>
+		Next
+	</Button>
 </div>
