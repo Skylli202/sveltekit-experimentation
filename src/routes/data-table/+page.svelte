@@ -96,6 +96,6 @@
 	];
 </script>
 
-<div class="flex justify-center content-center">
+<div class="flex flex-col">
 	<DataTable data={payments} />
 </div>

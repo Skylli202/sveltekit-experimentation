@@ -12,7 +12,20 @@
 		table.column({ accessor: 'id', header: 'ID' }),
 		table.column({ accessor: 'status', header: 'Status' }),
 		table.column({ accessor: 'email', header: 'Email' }),
-		table.column({ accessor: 'amount', header: 'Amount' }),
+		table.column({
+			accessor: 'amount',
+			header: 'Amount',
+			cell: ({ value }) => {
+				const formatter = new Intl.NumberFormat('en-US', {
+					style: 'currency',
+					currency: 'USD',
+				});
+
+				const formatted = formatter.format(value);
+
+				return formatted;
+			},
+		}),
 		table.column({ accessor: ({ email }) => email, header: '' }),
 	]);
 
@@ -28,7 +41,13 @@
 						{#each headerRow.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()}>
 								<Table.Head {...attrs}>
-									<Render of={cell.render()} />
+									{#if cell.id === 'amount'}
+										<div class="text-right">
+											<Render of={cell.render()} />
+										</div>
+									{:else}
+										<Render of={cell.render()} />
+									{/if}
 								</Table.Head>
 							</Subscribe>
 						{/each}
@@ -44,7 +63,17 @@
 						{#each row.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs>
 								<Table.Cell {...attrs}>
-									<Render of={cell.render()} />
+									{#if cell.id === 'amount'}
+										<div class="text-right font-medium">
+											<Render of={cell.render()} />
+										</div>
+									{:else if cell.id === 'status'}
+										<div class="capitalize">
+											<Render of={cell.render()} />
+										</div>
+									{:else}
+										<Render of={cell.render()} />
+									{/if}
 								</Table.Cell>
 							</Subscribe>
 						{/each}
