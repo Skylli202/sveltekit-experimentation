@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Payment } from './+page.svelte';
 	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
-	import { addPagination } from 'svelte-headless-table/plugins';
+	import { addPagination, addSortBy } from 'svelte-headless-table/plugins';
 	import { readable } from 'svelte/store';
+	import { ArrowUpDown } from 'lucide-svelte';
+
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import DataTableActions from './data-table-actions.svelte';
@@ -12,11 +14,12 @@
 	const readableData = readable(data);
 	const table = createTable(readableData, {
 		page: addPagination(),
+		sort: addSortBy(),
 	});
 
 	const columns = table.createColumns([
-		table.column({ accessor: 'id', header: 'ID' }),
-		table.column({ accessor: 'status', header: 'Status' }),
+		table.column({ accessor: 'id', header: 'ID', plugins: { sort: { disable: true } } }),
+		table.column({ accessor: 'status', header: 'Status', plugins: { sort: { disable: true } } }),
 		table.column({ accessor: 'email', header: 'Email' }),
 		table.column({
 			accessor: 'amount',
@@ -31,6 +34,7 @@
 
 				return formatted;
 			},
+			plugins: { sort: { disable: true } },
 		}),
 		table.column({
 			accessor: ({ id }) => id,
@@ -38,6 +42,7 @@
 			cell: ({ value }) => {
 				return createRender(DataTableActions, { id: value });
 			},
+			plugins: { sort: { disable: true } },
 		}),
 	]);
 
@@ -54,12 +59,17 @@
 				<Subscribe rowAttrs={headerRow.attrs()}>
 					<Table.Row>
 						{#each headerRow.cells as cell (cell.id)}
-							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()}>
+							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 								<Table.Head {...attrs}>
 									{#if cell.id === 'amount'}
 										<div class="text-right">
 											<Render of={cell.render()} />
 										</div>
+									{:else if cell.id === 'email'}
+										<Button variant="ghost" on:click={props.sort.toggle}>
+											<Render of={cell.render()} />
+											<ArrowUpDown class="ml-2 h-4 w-4" />
+										</Button>
 									{:else}
 										<Render of={cell.render()} />
 									{/if}
