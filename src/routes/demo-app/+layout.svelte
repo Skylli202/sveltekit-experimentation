@@ -1,14 +1,14 @@
 <script>
-	import "../app.postcss";
-    import Header from './Header.svelte';
-    import './styles.css';
+	import '../../app.postcss';
+	import Header from '$lib/components/Header.svelte';
+	import '../styles.css';
 </script>
 
 <div class="app">
 	<Header></Header>
 
 	<main>
-		<slot></slot>
+		<slot />
 	</main>
 
 	<footer>
