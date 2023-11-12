@@ -33,10 +33,10 @@
 			},
 		}),
 		table.column({
-			accessor: ({ email }) => email,
+			accessor: ({ id }) => id,
 			header: '',
-			cell: ({ id }) => {
-				return createRender(DataTableActions, { id });
+			cell: ({ value }) => {
+				return createRender(DataTableActions, { id: value });
 			},
 		}),
 	]);
