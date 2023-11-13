@@ -11,6 +11,7 @@
 		addSortBy,
 		addTableFilter,
 		addHiddenColumns,
+		addSelectedRows,
 	} from 'svelte-headless-table/plugins';
 	import { readable } from 'svelte/store';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
@@ -20,6 +21,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import DataTableActions from './data-table-actions.svelte';
+	import DataTableCheckbox from './data-table-checkbox.svelte';
 
 	export let data: Payment[];
 
@@ -32,12 +34,26 @@
 				value.toLowerCase().includes(filterValue.toLowerCase()),
 		}),
 		hide: addHiddenColumns(),
+		select: addSelectedRows(),
 	});
 
 	const columns = table.createColumns([
 		table.column({
 			accessor: 'id',
-			header: 'ID',
+			header: (_, { pluginStates }) => {
+				const { allPageRowsSelected } = pluginStates.select;
+				return createRender(DataTableCheckbox, {
+					checked: allPageRowsSelected,
+				});
+			},
+			cell: ({ row }, { pluginStates }) => {
+				const { getRowState } = pluginStates.select;
+				const { isSelected } = getRowState(row);
+
+				return createRender(DataTableCheckbox, {
+					checked: isSelected,
+				});
+			},
 			plugins: { sort: { disable: true }, filter: { exclude: true } },
 		}),
 		table.column({
@@ -78,11 +94,13 @@
 		tableBodyAttrs,
 		pluginStates,
 		flatColumns,
+		rows,
 	} = table.createViewModel(columns);
 
 	const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page;
 	const { filterValue } = pluginStates.filter;
 	const { hiddenColumnIds } = pluginStates.hide;
+	const { selectedDataIds } = pluginStates.select;
 
 	const ids = flatColumns.map((c) => c.id);
 	let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
@@ -131,7 +149,7 @@
 									props={cell.props()}
 									let:props
 								>
-									<Table.Head {...attrs}>
+									<Table.Head {...attrs} class="[&:has([role=checkbox])]:pl-3">
 										{#if cell.id === 'amount'}
 											<div class="text-right">
 												<Render of={cell.render()} />
@@ -158,7 +176,7 @@
 						<Table.Row {...rowAttrs}>
 							{#each row.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs>
-									<Table.Cell {...attrs}>
+									<Table.Cell {...attrs} class="[&:has([role=checkbox])]:pl-3">
 										{#if cell.id === 'amount'}
 											<div class="text-right font-medium">
 												<Render of={cell.render()} />
@@ -181,6 +199,10 @@
 	</div>
 
 	<div class="flex items-center justify-end space-x-2 py-4">
+		<div class="flex-1 text-sm text-muted-foreground">
+			{Object.keys($selectedDataIds).length} of{' '}
+			{$rows.length} row(s) selected.
+		</div>
 		<Button
 			variant="outline"
 			size="sm"
