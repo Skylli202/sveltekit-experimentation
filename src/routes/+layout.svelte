@@ -1,13 +1,10 @@
 <script>
+	import { browser } from '$app/environment';
 	import '../app.postcss';
-	import './styles.css';
+
+	if (browser) document.documentElement.classList.add('dark');
 </script>
 
-<slot />
-
-<style>
-	:global(body) {
-		background-color: #fff;
-		background-image: none;
-	}
-</style>
+<div class="m-5">
+	<slot />
+</div>
